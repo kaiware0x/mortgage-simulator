@@ -7,11 +7,13 @@ interface LoanInputFormProps {
 }
 
 export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps) {
-  // 内部では万円単位で管理
+  // 内部では万円単位で管理（文字列として保持して入力中の状態を正しく反映）
   const [principalManEn, setPrincipalManEn] = useState(
-    initialValues?.principal ? initialValues.principal / 10000 : 3000
+    initialValues?.principal ? String(initialValues.principal / 10000) : '3000'
   );
-  const [annualRate, setAnnualRate] = useState(initialValues?.annualRate || 1.5);
+  const [annualRate, setAnnualRate] = useState(
+    initialValues?.annualRate !== undefined ? String(initialValues.annualRate) : '1.5'
+  );
   const [years, setYears] = useState(initialValues?.years || 35);
   const [earlyRepaymentsManEn, setEarlyRepaymentsManEn] = useState<Array<{ month: number; amount: number; type: 'period-reduction' | 'payment-reduction' }>>(
     initialValues?.earlyRepayments?.map(er => ({ month: er.month, amount: er.amount / 10000, type: er.type })) || []
@@ -22,8 +24,8 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
   // initialValuesが変更されたときに入力フィールドを更新
   useEffect(() => {
     if (initialValues) {
-      setPrincipalManEn(initialValues.principal / 10000);
-      setAnnualRate(initialValues.annualRate);
+      setPrincipalManEn(String(initialValues.principal / 10000));
+      setAnnualRate(String(initialValues.annualRate));
       setYears(initialValues.years);
       setEarlyRepaymentsManEn(
         initialValues.earlyRepayments?.map(er => ({
@@ -74,8 +76,8 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
 
     // 万円→円に変換して計算ロジックに渡す
     onCalculate({
-      principal: principalManEn * 10000,
-      annualRate,
+      principal: Number(principalManEn) * 10000,
+      annualRate: Number(annualRate),
       years,
       earlyRepayments: earlyRepaymentsManEn.length > 0
         ? earlyRepaymentsManEn.map(er => ({ month: er.month, amount: er.amount * 10000, type: er.type }))
@@ -105,7 +107,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             type="number"
             id="principal"
             value={principalManEn}
-            onChange={(e) => setPrincipalManEn(Number(e.target.value))}
+            onChange={(e) => setPrincipalManEn(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="0"
             step="10"
@@ -121,7 +123,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             type="number"
             id="annualRate"
             value={annualRate}
-            onChange={(e) => setAnnualRate(Number(e.target.value))}
+            onChange={(e) => setAnnualRate(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="0"
             max="20"

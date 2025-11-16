@@ -41,7 +41,7 @@ export function RepaymentSchedule({ schedule, title, color, originalPrincipal }:
         </div>
         <div>
           <p className="text-sm text-gray-600">元本合計</p>
-          <p className="text-lg font-semibold text-gray-700">
+          <p className="text-lg font-semibold text-blue-600">
             ¥{formatCurrency(totalPrincipal)}
           </p>
         </div>
