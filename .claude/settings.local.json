@@ -8,7 +8,12 @@
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
       "Bash(npm run build:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n住宅ローンシミュレーターの実装\n\n- 借入額・年利率・借入期間の入力フォーム\n- 繰上返済機能（期間短縮型・返済額軽減型）\n- 最大3シナリオの比較表示\n- URL/QRコードでの結果共有機能\n- 入力バリデーション（重複月チェック）\n- ローディング・成功アニメーション\n- レスポンシブデザイン対応\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh run:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []

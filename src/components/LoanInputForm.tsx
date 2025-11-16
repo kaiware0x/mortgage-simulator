@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { LoanInput, EarlyRepayment } from '../utils/mortgageCalculator';
+import type { LoanInput } from '../utils/mortgageCalculator';
 
 interface LoanInputFormProps {
   onCalculate: (input: LoanInput) => void;
