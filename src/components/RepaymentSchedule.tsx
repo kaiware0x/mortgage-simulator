@@ -22,6 +22,12 @@ export function RepaymentSchedule({ schedule, title, color, originalPrincipal, e
   const formatMonth = (month: number) => {
     const years = Math.floor(month / 12);
     const months = month % 12;
+    if (years === 0) {
+      return `${months}ヶ月`;
+    }
+    if (months === 0) {
+      return `${years}年`;
+    }
     return `${years}年${months}ヶ月`;
   };
 
