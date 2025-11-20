@@ -19,6 +19,7 @@ export function ComparisonView({ scenarios }: ComparisonViewProps) {
         title: title,
         color: COLORS[index],
         originalPrincipal: scenario.principal,
+        earlyRepayments: scenario.earlyRepayments || [],
       };
     })
     .filter((s) => s !== null);
@@ -41,6 +42,7 @@ export function ComparisonView({ scenarios }: ComparisonViewProps) {
           title={scenario.title}
           color={scenario.color}
           originalPrincipal={scenario.originalPrincipal}
+          earlyRepayments={scenario.earlyRepayments}
         />
       ))}
     </div>

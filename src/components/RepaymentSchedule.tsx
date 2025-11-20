@@ -1,14 +1,17 @@
-import type { MonthlyPayment } from '../utils/mortgageCalculator';
+import type { MonthlyPayment, EarlyRepayment } from '../utils/mortgageCalculator';
 
 interface RepaymentScheduleProps {
   schedule: MonthlyPayment[];
   title: string;
   color: string;
   originalPrincipal: number;
+  earlyRepayments?: EarlyRepayment[];
 }
 
-export function RepaymentSchedule({ schedule, title, color, originalPrincipal }: RepaymentScheduleProps) {
-  const totalPayment = schedule.reduce((sum, p) => sum + p.payment, 0);
+export function RepaymentSchedule({ schedule, title, color, originalPrincipal, earlyRepayments = [] }: RepaymentScheduleProps) {
+  const monthlyTotal = schedule.reduce((sum, p) => sum + p.payment, 0);
+  const earlyRepaymentTotal = earlyRepayments.reduce((sum, er) => sum + er.amount, 0);
+  const totalPayment = monthlyTotal + earlyRepaymentTotal;
   const totalInterest = schedule.reduce((sum, p) => sum + p.interest, 0);
   const totalPrincipal = originalPrincipal;
 
