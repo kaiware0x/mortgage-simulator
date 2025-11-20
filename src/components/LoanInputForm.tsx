@@ -12,7 +12,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
     initialValues?.principal ? String(initialValues.principal / 10000) : '3000'
   );
   const [annualRate, setAnnualRate] = useState(
-    initialValues?.annualRate !== undefined ? String(initialValues.annualRate) : '1.5'
+    initialValues?.annualRate !== undefined ? String(initialValues.annualRate) : '0.8'
   );
   const [years, setYears] = useState(initialValues?.years || 35);
   const [earlyRepaymentsManEn, setEarlyRepaymentsManEn] = useState<Array<{ month: number; amount: number; type: 'period-reduction' | 'payment-reduction' }>>(
