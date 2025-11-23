@@ -1,10 +1,16 @@
 // 住宅ローン計算のユーティリティ関数
 
+export interface InterestRateChange {
+  month: number; // 何ヶ月目に金利が変更されるか
+  newRate: number; // 新しい年利率（%）
+}
+
 export interface LoanInput {
   principal: number; // 借入額
   annualRate: number; // 年利率（%）
   years: number; // 借入期間（年）
   earlyRepayments?: EarlyRepayment[]; // 繰上返済
+  interestRateChanges?: InterestRateChange[]; // 金利変更
 }
 
 export interface EarlyRepayment {
@@ -43,8 +49,9 @@ export function calculateMonthlyPayment(
  * 住宅ローンの返済スケジュールを計算
  */
 export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
-  const { principal, annualRate, years, earlyRepayments = [] } = input;
-  const monthlyRate = annualRate / 100 / 12; // 月利
+  const { principal, annualRate, years, earlyRepayments = [], interestRateChanges = [] } = input;
+  let currentAnnualRate = annualRate;
+  let monthlyRate = currentAnnualRate / 100 / 12; // 月利
   const totalMonths = years * 12;
 
   const schedule: MonthlyPayment[] = [];
@@ -55,10 +62,34 @@ export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
   const sortedEarlyRepayments = [...earlyRepayments].sort((a, b) => a.month - b.month);
   let earlyRepaymentIndex = 0;
 
+  // 金利変更を月でソート
+  const sortedRateChanges = [...interestRateChanges].sort((a, b) => a.month - b.month);
+  let rateChangeIndex = 0;
+
   let month = 1;
   let plannedEndMonth = totalMonths; // 返済予定終了月
 
   while (remainingBalance > 0.01 && month <= totalMonths * 2) { // 最大2倍の期間でループ
+    // 金利変更の処理
+    while (
+      rateChangeIndex < sortedRateChanges.length &&
+      sortedRateChanges[rateChangeIndex].month === month
+    ) {
+      const rateChange = sortedRateChanges[rateChangeIndex];
+      currentAnnualRate = rateChange.newRate;
+      monthlyRate = currentAnnualRate / 100 / 12;
+
+      // 金利変更時は残高と残期間で再計算（返済額軽減型と同じロジック）
+      const remainingMonths = plannedEndMonth - month + 1; // 今月含む残期間
+      currentMonthlyPayment = calculateMonthlyPayment(
+        remainingBalance,
+        monthlyRate,
+        remainingMonths
+      );
+
+      rateChangeIndex++;
+    }
+
     // 繰上返済の処理（同じ月の複数の繰上返済を処理）
     while (
       earlyRepaymentIndex < sortedEarlyRepayments.length &&
@@ -75,7 +106,7 @@ export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
           // 返済期間は自動的に短縮される（残高が減るため）
         } else if (earlyRepayment.type === 'payment-reduction') {
           // 返済額軽減型：返済期間は変わらない、月々の返済額を再計算
-          const remainingMonths = plannedEndMonth - month;
+          const remainingMonths = plannedEndMonth - month; // 今月は繰上返済のみで通常の返済計算前なので、残期間はそのまま
           currentMonthlyPayment = calculateMonthlyPayment(
             remainingBalance,
             monthlyRate,
