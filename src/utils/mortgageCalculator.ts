@@ -11,6 +11,11 @@ export interface LoanInput {
   years: number; // 借入期間（年）
   earlyRepayments?: EarlyRepayment[]; // 繰上返済
   interestRateChanges?: InterestRateChange[]; // 金利変更
+  // 住宅ローン控除用
+  taxDeductionEnabled?: boolean;
+  taxDeductionLimit?: number; // 控除対象借入限度額
+  taxDeductionRate?: number; // 控除率
+  taxDeductionPeriod?: number; // 控除期間
 }
 
 export interface EarlyRepayment {
@@ -25,6 +30,11 @@ export interface MonthlyPayment {
   principal: number; // 元本返済額
   interest: number; // 利息額
   remainingBalance: number; // 残債
+}
+
+export interface SimulationResult {
+  schedule: MonthlyPayment[];
+  yearlyTaxDeductions: number[]; // 毎年の控除額
 }
 
 /**
@@ -48,8 +58,18 @@ export function calculateMonthlyPayment(
 /**
  * 住宅ローンの返済スケジュールを計算
  */
-export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
-  const { principal, annualRate, years, earlyRepayments = [], interestRateChanges = [] } = input;
+export function calculateRepaymentSchedule(input: LoanInput): SimulationResult {
+  const {
+    principal,
+    annualRate,
+    years,
+    earlyRepayments = [],
+    interestRateChanges = [],
+    taxDeductionEnabled = false,
+    taxDeductionLimit = 0,
+    taxDeductionRate = 0.007,
+    taxDeductionPeriod = 13
+  } = input;
   let currentAnnualRate = annualRate;
   let monthlyRate = currentAnnualRate / 100 / 12; // 月利
   const totalMonths = years * 12;
@@ -68,6 +88,8 @@ export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
 
   let month = 1;
   let plannedEndMonth = totalMonths; // 返済予定終了月
+
+  const yearlyTaxDeductions: number[] = [];
 
   while (remainingBalance > 0.01 && month <= totalMonths * 2) { // 最大2倍の期間でループ
     // 金利変更の処理
@@ -142,10 +164,24 @@ export function calculateRepaymentSchedule(input: LoanInput): MonthlyPayment[] {
       remainingBalance: Math.max(0, remainingBalance),
     });
 
+    // 住宅ローン控除の計算（各年の12月時点）
+    if (taxDeductionEnabled && month % 12 === 0) {
+      const year = month / 12;
+      if (year <= taxDeductionPeriod) {
+        // 年末残高（12月の残高）
+        const yearEndBalance = Math.max(0, remainingBalance);
+        // 控除対象額（限度額と年末残高の小さい方）
+        const deductionTarget = Math.min(yearEndBalance, taxDeductionLimit);
+        // 控除額（100円未満切り捨てなどの端数処理は一旦行わず、単純計算）
+        const deductionAmount = Math.floor(deductionTarget * taxDeductionRate);
+        yearlyTaxDeductions.push(deductionAmount);
+      }
+    }
+
     month++;
   }
 
-  return schedule;
+  return { schedule, yearlyTaxDeductions };
 }
 
 /**

@@ -3,6 +3,7 @@ import type { LoanInput } from './utils/mortgageCalculator';
 import { getScenariosFromUrl } from './utils/urlEncoder';
 import { LoanInputForm } from './components/LoanInputForm';
 import { ComparisonView } from './components/ComparisonView';
+import { TaxDeductionView } from './components/TaxDeductionView';
 import { ShareableLink } from './components/ShareableLink';
 
 function App() {
@@ -79,6 +80,7 @@ function App() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">比較結果</h2>
           <ComparisonView scenarios={scenarios} />
+          <TaxDeductionView scenarios={scenarios} />
         </div>
       </div>
     </div>

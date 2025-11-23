@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# 住宅ローンシミュレーター (Mortgage Simulator)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite で構築された、多機能な住宅ローン返済シミュレーションツールです。
+借入額、金利、返済期間などの条件を入力し、月々の返済額や総支払額を計算できます。また、繰上返済や途中の金利変更も考慮した詳細なシミュレーションが可能です。
 
-Currently, two official plugins are available:
+## 主な機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **基本計算**: 借入額、年利率、返済期間（年）から、月々の返済額を算出します。
+- **繰上返済シミュレーション**:
+  - 「期間短縮型」と「返済額軽減型」の2種類に対応。
+  - 任意のタイミングで複数回の繰上返済を設定可能。
+- **金利変更対応**:
+  - 返済期間の途中で金利が変更されるケース（変動金利や固定期間終了後など）をシミュレーション可能。
+- **シナリオ比較**:
+  - 最大3つの異なる条件（シナリオ）を並べて比較・保存できます。
+- **共有機能**:
+  - 入力された条件をURLパラメータとして保持し、シミュレーション結果を簡単に共有できます。
 
-## React Compiler
+## 技術スタック
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **フレームワーク**: React
+- **言語**: TypeScript
+- **ビルドツール**: Vite
+- **スタイリング**: Tailwind CSS
+- **その他**:
+  - `qrcode.react`: 共有用QRコード生成
 
-## Expanding the ESLint configuration
+## セットアップと実行
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 必要要件
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js (推奨バージョン: LTS)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### インストール
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 開発サーバーの起動
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+ブラウザで `http://localhost:5173` (またはコンソールに表示されるURL) にアクセスしてください。
+
+### ビルド
+
+```bash
+npm run build
+```
+
+## ライセンス
+
+このプロジェクトは MIT ライセンスの下で公開されています。

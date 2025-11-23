@@ -12,7 +12,7 @@ export function ComparisonView({ scenarios }: ComparisonViewProps) {
   const validScenarios = scenarios
     .map((scenario, index) => {
       if (!scenario) return null;
-      const schedule = calculateRepaymentSchedule(scenario);
+      const { schedule } = calculateRepaymentSchedule(scenario);
       const title = `シナリオ${index + 1}`;
       return {
         schedule,
