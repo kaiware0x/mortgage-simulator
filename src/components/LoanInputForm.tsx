@@ -180,105 +180,105 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             required
           />
         </div>
+      </div>
 
-        {/* 繰上返済 */}
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium text-gray-700">繰上返済</h3>
-            <button
-              type="button"
-              onClick={handleAddEarlyRepayment}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
-            >
-              + 追加
-            </button>
-          </div>
+      {/* 繰上返済 */}
+      <div className="space-y-6 bg-white p-6 rounded-lg shadow-md mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-700">繰上返済</h3>
+          <button
+            type="button"
+            onClick={handleAddEarlyRepayment}
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+          >
+            + 追加
+          </button>
+        </div>
 
-          {earlyRepaymentsManEn.map((repayment, index) => (
-            <div key={index} className="flex gap-4 mb-4 items-end">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  返済年月（{index + 1}回目）
-                </label>
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={Math.floor(repayment.month / 12) === 0 ? '' : Math.floor(repayment.month / 12)}
-                      onChange={(e) => {
-                        const inputYears = e.target.value === '' ? 0 : Number(e.target.value);
-                        const months = repayment.month % 12;
-                        handleEarlyRepaymentChange(index, 'month', inputYears * 12 + months);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      min="0"
-                      max={years}
-                      required
-                    />
-                    <span className="text-xs text-gray-500 block mt-1">年</span>
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={repayment.month % 12 === 0 ? '' : repayment.month % 12}
-                      onChange={(e) => {
-                        const currentYears = Math.floor(repayment.month / 12);
-                        const inputMonths = e.target.value === '' ? 0 : Number(e.target.value);
-                        handleEarlyRepaymentChange(index, 'month', currentYears * 12 + inputMonths);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      min="0"
-                      max="11"
-                      required
-                    />
-                    <span className="text-xs text-gray-500 block mt-1">ヶ月</span>
-                  </div>
+        {earlyRepaymentsManEn.map((repayment, index) => (
+          <div key={index} className="flex gap-4 mb-4 items-end">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                返済年月（{index + 1}回目）
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={Math.floor(repayment.month / 12) === 0 ? '' : Math.floor(repayment.month / 12)}
+                    onChange={(e) => {
+                      const inputYears = e.target.value === '' ? 0 : Number(e.target.value);
+                      const months = repayment.month % 12;
+                      handleEarlyRepaymentChange(index, 'month', inputYears * 12 + months);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    min="0"
+                    max={years}
+                    required
+                  />
+                  <span className="text-xs text-gray-500 block mt-1">年</span>
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={repayment.month % 12 === 0 ? '' : repayment.month % 12}
+                    onChange={(e) => {
+                      const currentYears = Math.floor(repayment.month / 12);
+                      const inputMonths = e.target.value === '' ? 0 : Number(e.target.value);
+                      handleEarlyRepaymentChange(index, 'month', currentYears * 12 + inputMonths);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    min="0"
+                    max="11"
+                    required
+                  />
+                  <span className="text-xs text-gray-500 block mt-1">ヶ月</span>
                 </div>
               </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  返済額（万円）
-                </label>
-                <input
-                  type="number"
-                  value={repayment.amount === 0 ? '' : repayment.amount}
-                  onChange={(e) =>
-                    handleEarlyRepaymentChange(index, 'amount', e.target.value === '' ? 0 : Number(e.target.value))
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  min="0"
-                  step="1"
-                  required
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  返済タイプ
-                </label>
-                <select
-                  value={repayment.type}
-                  onChange={(e) =>
-                    handleEarlyRepaymentChange(index, 'type', e.target.value)
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="period-reduction">期間短縮型</option>
-                  <option value="payment-reduction">返済額軽減型</option>
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleRemoveEarlyRepayment(index)}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
-              >
-                削除
-              </button>
             </div>
-          ))}
-        </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                返済額（万円）
+              </label>
+              <input
+                type="number"
+                value={repayment.amount === 0 ? '' : repayment.amount}
+                onChange={(e) =>
+                  handleEarlyRepaymentChange(index, 'amount', e.target.value === '' ? 0 : Number(e.target.value))
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min="0"
+                step="1"
+                required
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                返済タイプ
+              </label>
+              <select
+                value={repayment.type}
+                onChange={(e) =>
+                  handleEarlyRepaymentChange(index, 'type', e.target.value)
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                required
+              >
+                <option value="period-reduction">期間短縮型</option>
+                <option value="payment-reduction">返済額軽減型</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleRemoveEarlyRepayment(index)}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+            >
+              削除
+            </button>
+          </div>
+        ))}
       </div>
 
       {/* 金利変更 */}
