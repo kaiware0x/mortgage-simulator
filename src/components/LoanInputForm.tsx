@@ -24,6 +24,12 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success'>('idle');
 
+  // 住宅ローン控除用State
+  const [taxDeductionEnabled, setTaxDeductionEnabled] = useState(initialValues?.taxDeductionEnabled || false);
+  const [taxDeductionLimit, setTaxDeductionLimit] = useState(initialValues?.taxDeductionLimit ? String(initialValues.taxDeductionLimit / 10000) : '4000');
+  const [taxDeductionRate, setTaxDeductionRate] = useState(initialValues?.taxDeductionRate ? String(initialValues.taxDeductionRate * 100) : '0.7');
+  const [taxDeductionPeriod, setTaxDeductionPeriod] = useState(initialValues?.taxDeductionPeriod || 13);
+
   // initialValuesが変更されたときに入力フィールドを更新
   useEffect(() => {
     if (initialValues) {
@@ -43,6 +49,12 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
           newRate: irc.newRate
         })) || []
       );
+      if (initialValues.taxDeductionEnabled !== undefined) {
+        setTaxDeductionEnabled(initialValues.taxDeductionEnabled);
+        setTaxDeductionLimit(initialValues.taxDeductionLimit ? String(initialValues.taxDeductionLimit / 10000) : '4000');
+        setTaxDeductionRate(initialValues.taxDeductionRate ? String(initialValues.taxDeductionRate * 100) : '0.7');
+        setTaxDeductionPeriod(initialValues.taxDeductionPeriod || 13);
+      }
     }
   }, [initialValues]);
 
@@ -112,6 +124,10 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
       interestRateChanges: interestRateChanges.length > 0
         ? interestRateChanges
         : undefined,
+      taxDeductionEnabled,
+      taxDeductionLimit: taxDeductionEnabled ? Number(taxDeductionLimit) * 10000 : undefined,
+      taxDeductionRate: taxDeductionEnabled ? Number(taxDeductionRate) / 100 : undefined,
+      taxDeductionPeriod: taxDeductionEnabled ? taxDeductionPeriod : undefined,
     });
 
     // 最低0.5秒のローディング表示を保証
@@ -365,29 +381,96 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
         ))}
       </div>
 
-      {/* エラーツールチップ */}
-      {
-        errorMessage && (
-          <div className="mt-4 relative">
-            <div className="bg-red-500 text-white px-4 py-3 rounded-md shadow-lg flex items-start gap-3">
-              <span className="flex-shrink-0 text-xl">⚠️</span>
-              <p className="text-sm">{errorMessage}</p>
-              <button
-                type="button"
-                onClick={() => setErrorMessage(null)}
-                className="flex-shrink-0 ml-auto text-white hover:text-red-100 font-bold text-xl leading-none"
-                aria-label="閉じる"
-              >
-                ×
-              </button>
-            </div>
-            {/* 下向き矢印 */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-2">
-              <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-red-500"></div>
+      {/* 住宅ローン控除設定 */}
+      <div className="space-y-6 bg-white p-6 rounded-lg shadow-md mt-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium text-gray-700">住宅ローン控除設定</h3>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="taxDeductionEnabled"
+              checked={taxDeductionEnabled}
+              onChange={(e) => setTaxDeductionEnabled(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="taxDeductionEnabled" className="ml-2 block text-sm text-gray-900">
+              有効にする
+            </label>
+          </div>
+        </div>
+
+        {taxDeductionEnabled && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  控除対象借入限度額
+                </label>
+                <select
+                  value={taxDeductionLimit}
+                  onChange={(e) => setTaxDeductionLimit(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="5000">5000万円</option>
+                  <option value="4500">4500万円</option>
+                  <option value="4000">4000万円</option>
+                  <option value="3500">3500万円</option>
+                  <option value="3000">3000万円</option>
+                  <option value="2000">2000万円</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  控除率
+                </label>
+                <select
+                  value={taxDeductionRate}
+                  onChange={(e) => setTaxDeductionRate(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="0.7">0.7%</option>
+                  <option value="1.0">1.0%</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  控除期間
+                </label>
+                <select
+                  value={taxDeductionPeriod}
+                  onChange={(e) => setTaxDeductionPeriod(Number(e.target.value))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="13">13年</option>
+                  <option value="10">10年</option>
+                </select>
+              </div>
             </div>
           </div>
-        )
-      }
+        )}
+      </div>
+
+      {/* エラーツールチップ */}
+      {errorMessage && (
+        <div className="mt-4 relative">
+          <div className="bg-red-500 text-white px-4 py-3 rounded-md shadow-lg flex items-start gap-3">
+            <span className="flex-shrink-0 text-xl">⚠️</span>
+            <p className="text-sm">{errorMessage}</p>
+            <button
+              type="button"
+              onClick={() => setErrorMessage(null)}
+              className="flex-shrink-0 ml-auto text-white hover:text-red-100 font-bold text-xl leading-none"
+              aria-label="閉じる"
+            >
+              ×
+            </button>
+          </div>
+          {/* 下向き矢印 */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-2">
+            <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-red-500"></div>
+          </div>
+        </div>
+      )}
 
       {/* 計算ボタン */}
       <button
