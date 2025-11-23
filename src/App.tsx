@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { LoanInput } from './utils/mortgageCalculator';
-import { getScenariosFromUrl } from './utils/urlEncoder';
+import { getScenariosFromUrl, encodeScenarios } from './utils/urlEncoder';
 import { LoanInputForm } from './components/LoanInputForm';
 import { ComparisonView } from './components/ComparisonView';
 import { TaxDeductionView } from './components/TaxDeductionView';
@@ -10,13 +10,40 @@ function App() {
   const [scenarios, setScenarios] = useState<(LoanInput | null)[]>([null, null, null]);
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
 
+  const [isInitialized, setIsInitialized] = useState(false);
+
   // URLからシナリオを復元
   useEffect(() => {
     const urlScenarios = getScenariosFromUrl();
     if (urlScenarios) {
       setScenarios(urlScenarios);
     }
+
+    // タブパラメータの読み込み
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      const index = Number(tab);
+      if (!isNaN(index) && index >= 0 && index <= 2) {
+        setCurrentScenarioIndex(index);
+      }
+    }
+
+    setIsInitialized(true);
   }, []);
+
+  // シナリオ変更時にURLを更新
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const encoded = encodeScenarios(scenarios);
+    const params = new URLSearchParams(window.location.search);
+    params.set('data', encoded);
+    params.set('tab', String(currentScenarioIndex));
+
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, '', newUrl);
+  }, [scenarios, currentScenarioIndex, isInitialized]);
 
   const handleCalculate = (input: LoanInput) => {
     const newScenarios = [...scenarios];
