@@ -129,6 +129,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
   return (
     <>
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+        {/* 借入額 */}
         <div>
           <label htmlFor="principal" className="block text-sm font-medium text-gray-700 mb-2">
             借入額（万円）
@@ -145,6 +146,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
           />
         </div>
 
+        {/* 年利率 */}
         <div>
           <label htmlFor="annualRate" className="block text-sm font-medium text-gray-700 mb-2">
             年利率（%）
@@ -162,6 +164,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
           />
         </div>
 
+        {/* 借入期間 */}
         <div>
           <label htmlFor="years" className="block text-sm font-medium text-gray-700 mb-2">
             借入期間（年）
@@ -178,6 +181,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
           />
         </div>
 
+        {/* 繰上返済 */}
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium text-gray-700">繰上返済</h3>
@@ -200,7 +204,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
                   <div className="flex-1">
                     <input
                       type="number"
-                      placeholder="何年目"
+                      placeholder="0"
                       value={Math.floor(repayment.month / 12) === 0 ? '' : Math.floor(repayment.month / 12)}
                       onChange={(e) => {
                         const inputYears = e.target.value === '' ? 0 : Number(e.target.value);
@@ -217,8 +221,8 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
                   <div className="flex-1">
                     <input
                       type="number"
-                      placeholder="何ヶ月目"
-                      value={repayment.month % 12}
+                      placeholder="0"
+                      value={repayment.month % 12 === 0 ? '' : repayment.month % 12}
                       onChange={(e) => {
                         const currentYears = Math.floor(repayment.month / 12);
                         const inputMonths = e.target.value === '' ? 0 : Number(e.target.value);
@@ -277,7 +281,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
         </div>
       </div>
 
-
+      {/* 金利変更 */}
       <div className="space-y-6 bg-white p-6 rounded-lg shadow-md mt-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium text-gray-700">金利変更（変動金利・固定期間終了後など）</h3>
@@ -300,7 +304,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
                 <div className="flex-1">
                   <input
                     type="number"
-                    placeholder="何年目"
+                    placeholder="0"
                     value={Math.floor(change.month / 12) === 0 ? '' : Math.floor(change.month / 12)}
                     onChange={(e) => {
                       const inputYears = e.target.value === '' ? 0 : Number(e.target.value);
@@ -317,8 +321,8 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
                 <div className="flex-1">
                   <input
                     type="number"
-                    placeholder="何ヶ月目"
-                    value={change.month % 12}
+                    placeholder="0"
+                    value={change.month % 12 === 0 ? '' : change.month % 12}
                     onChange={(e) => {
                       const currentYears = Math.floor(change.month / 12);
                       const inputMonths = e.target.value === '' ? 0 : Number(e.target.value);
