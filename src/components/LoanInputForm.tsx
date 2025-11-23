@@ -27,7 +27,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
   // 住宅ローン控除用State
   const [taxDeductionEnabled, setTaxDeductionEnabled] = useState(initialValues?.taxDeductionEnabled || false);
   const [taxDeductionLimit, setTaxDeductionLimit] = useState(initialValues?.taxDeductionLimit ? String(initialValues.taxDeductionLimit / 10000) : '4000');
-  const [taxDeductionRate, setTaxDeductionRate] = useState(initialValues?.taxDeductionRate ? String(initialValues.taxDeductionRate * 100) : '0.7');
+  const [taxDeductionRate, setTaxDeductionRate] = useState(initialValues?.taxDeductionRate ? (initialValues.taxDeductionRate * 100).toFixed(1) : '0.7');
   const [taxDeductionPeriod, setTaxDeductionPeriod] = useState(initialValues?.taxDeductionPeriod || 13);
 
   // initialValuesが変更されたときに入力フィールドを更新
@@ -52,7 +52,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
       if (initialValues.taxDeductionEnabled !== undefined) {
         setTaxDeductionEnabled(initialValues.taxDeductionEnabled);
         setTaxDeductionLimit(initialValues.taxDeductionLimit ? String(initialValues.taxDeductionLimit / 10000) : '4000');
-        setTaxDeductionRate(initialValues.taxDeductionRate ? String(initialValues.taxDeductionRate * 100) : '0.7');
+        setTaxDeductionRate(initialValues.taxDeductionRate ? (initialValues.taxDeductionRate * 100).toFixed(1) : '0.7');
         setTaxDeductionPeriod(initialValues.taxDeductionPeriod || 13);
       }
     }

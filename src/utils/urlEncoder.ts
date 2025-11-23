@@ -11,6 +11,11 @@ export function encodeScenarios(scenarios: (LoanInput | null)[]): string {
       r: s.annualRate,
       y: s.years,
       e: s.earlyRepayments?.map((er) => [er.month, er.amount, er.type]) || [],
+      i: s.interestRateChanges?.map((irc) => [irc.month, irc.newRate]) || [],
+      td: s.taxDeductionEnabled ? 1 : 0,
+      tdl: s.taxDeductionLimit,
+      tdr: s.taxDeductionRate,
+      tdp: s.taxDeductionPeriod,
     };
   });
 
@@ -32,11 +37,19 @@ export function decodeScenarios(encoded: string): (LoanInput | null)[] {
         principal: s.p,
         annualRate: s.r,
         years: s.y,
-        earlyRepayments: s.e.map((er: [number, number, string]) => ({
+        earlyRepayments: s.e?.map((er: [number, number, string]) => ({
           month: er[0],
           amount: er[1],
           type: er[2] as 'period-reduction' | 'payment-reduction',
-        })),
+        })) || [],
+        interestRateChanges: s.i?.map((irc: [number, number]) => ({
+          month: irc[0],
+          newRate: irc[1],
+        })) || [],
+        taxDeductionEnabled: s.td === 1,
+        taxDeductionLimit: s.tdl,
+        taxDeductionRate: s.tdr,
+        taxDeductionPeriod: s.tdp,
       };
     });
   } catch (error) {
