@@ -1,4 +1,4 @@
-import { calculateRepaymentSchedule, LoanInput, SimulationResult } from '../utils/mortgageCalculator';
+import { calculateRepaymentSchedule, type LoanInput, type SimulationResult } from '../utils/mortgageCalculator';
 
 // メッセージの型定義
 export type WorkerMessage = {
