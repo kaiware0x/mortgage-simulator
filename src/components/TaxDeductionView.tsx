@@ -1,18 +1,21 @@
-import type { LoanInput } from '../utils/mortgageCalculator';
-import { calculateRepaymentSchedule } from '../utils/mortgageCalculator';
+import type { LoanInput, SimulationResult } from '../utils/mortgageCalculator';
 
 interface TaxDeductionViewProps {
     scenarios: (LoanInput | null)[];
+    results: (SimulationResult | null)[];
 }
 
 const COLORS = ['text-blue-600', 'text-green-600', 'text-purple-600', 'text-black-600'];
 const BG_COLORS = ['bg-blue-50', 'bg-green-50', 'bg-purple-50', 'bg-gray-50'];
 
-export function TaxDeductionView({ scenarios }: TaxDeductionViewProps) {
+export function TaxDeductionView({ scenarios, results }: TaxDeductionViewProps) {
     const validScenarios = scenarios
         .map((scenario, index) => {
             if (!scenario || !scenario.taxDeductionEnabled) return null;
-            const { yearlyTaxDeductions } = calculateRepaymentSchedule(scenario);
+            const result = results[index];
+            if (!result) return null;
+
+            const { yearlyTaxDeductions } = result;
             const title = `シナリオ${index + 1}`;
             return {
                 yearlyTaxDeductions,

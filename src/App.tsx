@@ -1,22 +1,59 @@
-import { useState, useEffect } from 'react';
-import type { LoanInput } from './utils/mortgageCalculator';
+import { useState, useEffect, useRef } from 'react';
+import type { LoanInput, SimulationResult } from './utils/mortgageCalculator';
 import { getScenariosFromUrl, encodeScenarios } from './utils/urlEncoder';
 import { LoanInputForm } from './components/LoanInputForm';
 import { ComparisonView } from './components/ComparisonView';
 import { TaxDeductionView } from './components/TaxDeductionView';
 import { ShareableLink } from './components/ShareableLink';
+import type { WorkerMessage, WorkerResponse } from './workers/calculationWorker';
 
 function App() {
   const [scenarios, setScenarios] = useState<(LoanInput | null)[]>([null, null, null]);
+  const [simulationResults, setSimulationResults] = useState<(SimulationResult | null)[]>([null, null, null]);
   const [currentScenarioIndex, setCurrentScenarioIndex] = useState(0);
-
+  const [isCalculating, setIsCalculating] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  const workerRef = useRef<Worker | null>(null);
+
+  // Workerの初期化
+  useEffect(() => {
+    workerRef.current = new Worker(new URL('./workers/calculationWorker.ts', import.meta.url), {
+      type: 'module',
+    });
+
+    workerRef.current.onmessage = (event: MessageEvent<WorkerResponse>) => {
+      const { type, payload } = event.data;
+      if (type === 'result') {
+        setSimulationResults(payload.results);
+        setIsCalculating(false);
+      }
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  // 計算実行関数
+  const runCalculation = (currentScenarios: (LoanInput | null)[]) => {
+    if (!workerRef.current) return;
+
+    setIsCalculating(true);
+    const message: WorkerMessage = {
+      type: 'calculate',
+      payload: { scenarios: currentScenarios },
+    };
+    workerRef.current.postMessage(message);
+  };
 
   // URLからシナリオを復元
   useEffect(() => {
     const urlScenarios = getScenariosFromUrl();
     if (urlScenarios) {
       setScenarios(urlScenarios);
+      // 復元したシナリオで計算を実行
+      runCalculation(urlScenarios);
     }
 
     // タブパラメータの読み込み
@@ -49,12 +86,14 @@ function App() {
     const newScenarios = [...scenarios];
     newScenarios[currentScenarioIndex] = input;
     setScenarios(newScenarios);
+    runCalculation(newScenarios);
   };
 
   const handleClearScenario = (index: number) => {
     const newScenarios = [...scenarios];
     newScenarios[index] = null;
     setScenarios(newScenarios);
+    runCalculation(newScenarios);
   };
 
   return (
@@ -99,6 +138,7 @@ function App() {
           <LoanInputForm
             onCalculate={handleCalculate}
             initialValues={scenarios[currentScenarioIndex] || undefined}
+            isCalculating={isCalculating}
           />
         </div>
 
@@ -106,8 +146,8 @@ function App() {
 
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">比較結果</h2>
-          <ComparisonView scenarios={scenarios} />
-          <TaxDeductionView scenarios={scenarios} />
+          <ComparisonView results={simulationResults} scenarios={scenarios} />
+          <TaxDeductionView results={simulationResults} scenarios={scenarios} />
         </div>
       </div>
     </div>

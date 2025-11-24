@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { LoanInput } from '../utils/mortgageCalculator';
 
 interface LoanInputFormProps {
   onCalculate: (input: LoanInput) => void;
   initialValues?: LoanInput;
+  isCalculating: boolean;
 }
 
-export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps) {
+export function LoanInputForm({ onCalculate, initialValues, isCalculating }: LoanInputFormProps) {
   // 内部では万円単位で管理（文字列として保持して入力中の状態を正しく反映）
   const [principalManEn, setPrincipalManEn] = useState(
     initialValues?.principal ? String(initialValues.principal / 10000) : '3000'
@@ -22,13 +23,25 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
     initialValues?.interestRateChanges?.map(irc => ({ month: irc.month, newRate: irc.newRate })) || []
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success'>('idle');
 
   // 住宅ローン控除用State
   const [taxDeductionEnabled, setTaxDeductionEnabled] = useState(initialValues?.taxDeductionEnabled || false);
   const [taxDeductionLimit, setTaxDeductionLimit] = useState(initialValues?.taxDeductionLimit ? String(initialValues.taxDeductionLimit / 10000) : '4000');
   const [taxDeductionRate, setTaxDeductionRate] = useState(initialValues?.taxDeductionRate ? (initialValues.taxDeductionRate * 100).toFixed(1) : '0.7');
   const [taxDeductionPeriod, setTaxDeductionPeriod] = useState(initialValues?.taxDeductionPeriod || 13);
+
+  const [showSuccess, setShowSuccess] = useState(false);
+  // isCalculatingの前の値を保持して完了を検知
+  const prevIsCalculating = useRef(isCalculating);
+
+  useEffect(() => {
+    if (prevIsCalculating.current && !isCalculating) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => setShowSuccess(false), 1500);
+      return () => clearTimeout(timer);
+    }
+    prevIsCalculating.current = isCalculating;
+  }, [isCalculating]);
 
   // initialValuesが変更されたときに入力フィールドを更新
   useEffect(() => {
@@ -99,6 +112,22 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
     // エラーメッセージをクリア
     setErrorMessage(null);
 
+    // 借入額チェック
+    const principal = Number(principalManEn);
+    if (principal < 10) {
+      setErrorMessage('借入額は10万円以上で入力してください。');
+      setTimeout(() => setErrorMessage(null), 3000);
+      return;
+    }
+
+    // 年利率チェック
+    const rate = Number(annualRate);
+    if (rate < 0 || rate > 50) {
+      setErrorMessage('年利率は0%〜50%の間で入力してください。');
+      setTimeout(() => setErrorMessage(null), 3000);
+      return;
+    }
+
     // 重複月チェック
     if (earlyRepaymentsManEn.length > 0) {
       const monthSet = new Set(earlyRepaymentsManEn.map(er => er.month));
@@ -108,10 +137,6 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
         return;
       }
     }
-
-    // ローディング開始
-    setButtonState('loading');
-    const startTime = Date.now();
 
     // 万円→円に変換して計算ロジックに渡す
     onCalculate({
@@ -129,17 +154,6 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
       taxDeductionRate: taxDeductionEnabled ? Number(taxDeductionRate) / 100 : undefined,
       taxDeductionPeriod: taxDeductionEnabled ? taxDeductionPeriod : undefined,
     });
-
-    // 最低0.5秒のローディング表示を保証
-    const elapsedTime = Date.now() - startTime;
-    const remainingTime = Math.max(0, 750 - elapsedTime);
-
-    setTimeout(() => {
-      setButtonState('success');
-      setTimeout(() => {
-        setButtonState('idle');
-      }, 1500);
-    }, remainingTime);
   };
 
   return (
@@ -154,10 +168,15 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             type="number"
             id="principal"
             value={principalManEn}
-            onChange={(e) => setPrincipalManEn(e.target.value)}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              if (val > 100000000) return;
+              setPrincipalManEn(e.target.value);
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            min="0"
-            step="10"
+            min="10"
+            max="100000000"
+            step="100"
             required
           />
         </div>
@@ -174,7 +193,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             onChange={(e) => setAnnualRate(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="0"
-            max="20"
+            max="50"
             step="0.001"
             required
           />
@@ -189,10 +208,14 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             type="number"
             id="years"
             value={years === 0 ? '' : years}
-            onChange={(e) => setYears(e.target.value === '' ? 0 : Number(e.target.value))}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              if (val > 99) return;
+              setYears(e.target.value === '' ? 0 : val);
+            }}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             min="1"
-            max="50"
+            max="99"
             required
           />
         </div>
@@ -365,7 +388,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 min="0"
-                max="20"
+                max="50"
                 step="0.001"
                 required
               />
@@ -476,16 +499,16 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={buttonState !== 'idle'}
+        disabled={isCalculating}
         className={`w-full px-6 py-3 font-medium rounded-md transition-all duration-300 flex items-center justify-center gap-3 ${errorMessage ? 'mt-2' : 'mt-6'
-          } ${buttonState === 'idle'
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : buttonState === 'loading'
-              ? 'bg-blue-500 text-white cursor-wait'
-              : 'bg-green-600 text-white'
+          } ${isCalculating
+            ? 'bg-blue-500 text-white cursor-wait'
+            : showSuccess
+              ? 'bg-green-600 text-white'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
       >
-        {buttonState === 'loading' && (
+        {isCalculating && (
           <svg
             className="animate-spin h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
@@ -507,7 +530,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
             />
           </svg>
         )}
-        {buttonState === 'success' && (
+        {showSuccess && !isCalculating && (
           <svg
             className="h-6 w-6"
             fill="none"
@@ -524,9 +547,7 @@ export function LoanInputForm({ onCalculate, initialValues }: LoanInputFormProps
           </svg>
         )}
         <span>
-          {buttonState === 'idle' && '計算する'}
-          {buttonState === 'loading' && '計算中...'}
-          {buttonState === 'success' && '完了'}
+          {isCalculating ? '計算中...' : showSuccess ? '完了' : '計算する'}
         </span>
       </button>
     </>
