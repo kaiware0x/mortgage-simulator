@@ -1,18 +1,21 @@
-import type { LoanInput } from '../utils/mortgageCalculator';
-import { calculateRepaymentSchedule } from '../utils/mortgageCalculator';
+import type { LoanInput, SimulationResult } from '../utils/mortgageCalculator';
 import { RepaymentSchedule } from './RepaymentSchedule';
 
 interface ComparisonViewProps {
   scenarios: (LoanInput | null)[];
+  results: (SimulationResult | null)[];
 }
 
 const COLORS = ['border-blue-500', 'border-green-500', 'border-purple-500', 'border-black-500'];
 
-export function ComparisonView({ scenarios }: ComparisonViewProps) {
+export function ComparisonView({ scenarios, results }: ComparisonViewProps) {
   const validScenarios = scenarios
     .map((scenario, index) => {
       if (!scenario) return null;
-      const { schedule } = calculateRepaymentSchedule(scenario);
+      const result = results[index];
+      if (!result) return null;
+
+      const { schedule } = result;
       const title = `シナリオ${index + 1}`;
       return {
         schedule,
