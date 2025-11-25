@@ -38,8 +38,12 @@ export function TaxDeductionView({ scenarios, results }: TaxDeductionViewProps) 
     return (
         <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">住宅ローン控除（減税額）シミュレーション</h2>
-            <p className="text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-md border border-gray-200">
+            <p className="text-sm text-gray-600 mb-4 p-3 rounded-md border border-gray-200">
                 計算式：控除額 = min(年末残高, 借入限度額) × 控除率
+                <br />
+                ※ 実際の控除額は、所得税・住民税の納税額が上限となります（本シミュレーションでは納税額上限は考慮していません）。
+                <br />
+                ※ 2025年時点では、住民税からの控除上限は 97,500円 です。
             </p>
             <div className="overflow-x-auto bg-white rounded-lg shadow-md">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -88,10 +92,6 @@ export function TaxDeductionView({ scenarios, results }: TaxDeductionViewProps) 
                     </tbody>
                 </table>
             </div>
-            <p className="text-sm text-gray-500 mt-2">
-                ※ 控除額は年末残高と借入限度額の小さい方に控除率を掛けて計算しています。<br />
-                ※ 実際の控除額は、所得税・住民税の納税額が上限となります（本シミュレーションでは納税額上限は考慮していません）。
-            </p>
         </div>
     );
 }
