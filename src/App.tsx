@@ -149,6 +149,21 @@ function App() {
           <ComparisonView results={simulationResults} scenarios={scenarios} />
           <TaxDeductionView results={simulationResults} scenarios={scenarios} />
         </div>
+
+        <footer className="mt-12 py-8 border-t border-gray-200 text-center">
+          <p className="text-gray-500 text-sm mb-4">
+            &copy; {new Date().getFullYear()} kaiware0x. All rights reserved.
+          </p>
+          <a
+            href="https://www.buymeacoffee.com/kaiware0x"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-[#FFDD00] text-gray-900 rounded-full font-bold shadow-md hover:bg-[#FFEA00] hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+          >
+            <span className="text-xl">☕</span>
+            Buy Me a Coffee
+          </a>
+        </footer>
       </div>
     </div>
   );
